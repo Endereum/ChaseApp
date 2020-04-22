@@ -53,6 +53,7 @@ class _WebContainerState extends State<WebContainer> {
 
   @override
   void initState() {
+    //SystemChannels.textInput.invokeMethod('TextInput.hide');
     super.initState();
   }
 
@@ -108,8 +109,9 @@ class _WebContainerState extends State<WebContainer> {
               },
               // ignore: prefer_collection_literals
               javascriptChannels: <JavascriptChannel>[
-                _toasterJavascriptChannel(context),
                 _scanVINJavascriptChannel(context),
+                _toasterJavascriptChannel(context),
+                _keyboardJavascriptChannel(context),
               ].toSet(),
               onPageStarted: (String url) {
                 print('Page started loading: $url');
@@ -128,15 +130,6 @@ class _WebContainerState extends State<WebContainer> {
         ));
   }
 
-  JavascriptChannel _toasterJavascriptChannel(BuildContext context) {
-    return JavascriptChannel(
-        name: 'Toaster',
-        onMessageReceived: (JavascriptMessage message) async {
-          showSnackBar(context, message.message);
-          debugPrint(message.message);
-        });
-  }
-
   JavascriptChannel _scanVINJavascriptChannel(BuildContext context) {
     return JavascriptChannel(
         name: 'ScanVIN',
@@ -146,6 +139,24 @@ class _WebContainerState extends State<WebContainer> {
           debugPrint(result);
           _myController.evaluateJavascript(
               'document.getElementById("vinInput").value = \"$result\"');
+        });
+  }
+
+  JavascriptChannel _toasterJavascriptChannel(BuildContext context) {
+    return JavascriptChannel(
+        name: 'Toaster',
+        onMessageReceived: (JavascriptMessage message) async {
+          showSnackBar(context, message.message);
+          debugPrint(message.message);
+        });
+  }
+
+  JavascriptChannel _keyboardJavascriptChannel(BuildContext context) {
+    return JavascriptChannel(
+        name: 'Keyboard',
+        onMessageReceived: (JavascriptMessage message) async {
+          debugPrint(message.message);
+          SystemChannels.textInput.invokeMethod('TextInput.hide');
         });
   }
 
